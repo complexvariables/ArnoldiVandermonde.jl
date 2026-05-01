@@ -8,7 +8,7 @@
 
 `ArnoldiVandermonde.jl` is a Julia package for constructing and working with Arnoldi-based Vandermonde matrices. These matrices give a basis for polynomials orthogonalized over a discrete point set, which can enable robust function approximation.
 
-See (Brubeck & Trefethen, 2021)[https://doi.org/10.1137/19M130100X] for an introduction to the Arnoldi–Vandermonde algorithm.
+See [Brubeck & Trefethen, 2021](https://doi.org/10.1137/19M130100X) for an introduction to the Arnoldi–Vandermonde algorithm.
 
 ## Installation
 
@@ -33,7 +33,7 @@ Q = vectors(B)                               # 200 × 11 matrix of basis vectors
 cond(Q)                                      # ≈ 1
 f(z) = (z^8 - z^5 + 2) / 3^8
 y = f.(z)
-norm(Q * (Q \ y) - y)         # ≈ machine roundoff
+norm(Q * (Q \ y) - y)                        # ≈ machine roundoff
 ```
 
 To evaluate the resulting approximation at off-node points, you can create an `ArnoldiPolynomial`. 
