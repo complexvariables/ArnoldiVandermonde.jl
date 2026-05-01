@@ -1,7 +1,7 @@
 module ArnoldiVandermonde
 
 using LinearAlgebra
-export ArnoldiBasis, ArnoldiPolynomial, nodes, degree, evaluate, vectors, increment!
+export ArnoldiBasis, ArnoldiPolynomial, nodes, degree, evaluate, vectors, increment!, project
 
 const RCFloat{T} = Union{T, Complex{T}} where {T<:AbstractFloat}
 
@@ -215,17 +215,27 @@ function Base.:\(B::ArnoldiBasis, y::AbstractVector)
     return ArnoldiPolynomial(c, B)
 end
 
+"""
+    project(f, a, b; tol=100ε, max_degree=100, error_norm=x -> norm(x, Inf))
 
-function project(f::Function, a::Real, b::Real; tol=100eps(), max_degree=60)
-    x = range(a, b, 100)
-    y = f.(x)
+Project a function `f` in the least-squares sense onto the interval `[a, b]`, returning an ArnoldiPolynomial.
+The projection iteratively grows the basis until the infinity norm of the error is less than `tol` or the degree reaches `max_degree`. The `error_norm` function can be used to specify a different norm for measuring the error.
+"""
+function project(f::Function, a::Real, b::Real;
+    tol = 100eps(promote_type(typeof(float(a)), typeof(float(b)))),
+    max_degree = 100,
+    error_norm = x -> norm(x, Inf)
+    )
+    n = 32
     deg = 0
+    x = range(a, b, n+1)
+    y = f.(x)
+    B = ArnoldiBasis(x, deg; max_degree)
     p = []
     while true
-        B = ArnoldiBasis(x, deg)
-        p = B \ f
-        resid = f.(x) - p.(x)
-        if maximum(abs, resid) < tol
+        p = B \ y
+        resid = y - p.(x)
+        if error_norm(resid) < tol
             break
         end
         if deg >= max_degree
@@ -234,6 +244,12 @@ function project(f::Function, a::Real, b::Real; tol=100eps(), max_degree=60)
         end
         deg += 1
         increment!(B)
+        if length(x) < 3deg
+            n *= 2
+            x = range(a, b, n+1)
+            y = f.(x)
+            B = ArnoldiBasis(x, deg; max_degree)
+        end
     end
     return p
 end

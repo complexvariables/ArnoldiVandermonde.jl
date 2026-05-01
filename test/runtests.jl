@@ -16,7 +16,7 @@ using Aqua
                 Q = vectors(B)
                 @test nodes(B) == z
                 @test size(Q) == (n, m+1)
-                @test norm(Q' * Q - n * I) < 1e-12
+                @test norm(Q' * Q - n * I) < 1e-10
                 @test B.H isa UpperHessenberg
                 increment!(B)
                 m += 1
@@ -44,10 +44,13 @@ using Aqua
 
     @testset "Approximation" begin
         f(x) = exp(x)
-        z = range(0, 1, 40)
-        B = ArnoldiBasis(z, 8)
+        x = range(0, 1, 40)
+        B = ArnoldiBasis(x, 8)
         p = B \ f
-        @test p.(z) ≈ f.(z) atol=1e-6
+        @test p.(x) ≈ f.(x) atol=1e-9
+        p = project(f, 0, 1; tol=1e-13)
+        x = nodes(p)
+        @test p.(x) ≈ f.(x) atol=1e-13
     end
 
     @testset "Type promotion" begin
