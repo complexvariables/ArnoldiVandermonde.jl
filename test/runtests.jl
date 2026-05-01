@@ -30,6 +30,8 @@ using Aqua
         coeff = rand(6)
         p = ArnoldiPolynomial(coeff, B)
         @test p.coeff == coeff
+        @test length(p) == length(coeff)
+        @test degree(p) == 5
     end
 
     @testset "ArnoldiPolynomial evaluation" begin
@@ -51,6 +53,10 @@ using Aqua
         p = project(f, 0, 1; tol=1e-13)
         x = nodes(p)
         @test p.(x) ≈ f.(x) atol=1e-13
+        # force a node refinement, off-grid evaluation
+        f(x) = sin(16x)
+        p = project(f, 0, 1; tol=1e-13)
+        @test all(abs(p(x) - f(x)) < 1e-13 for x in range(0, 1, 1000))
     end
 
     @testset "Type promotion" begin
