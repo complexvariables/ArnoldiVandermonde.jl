@@ -1,7 +1,7 @@
 # ArnoldiVandermonde
 
-[![Build Status](https://github.com/tobydriscoll/ArnoldiVandermonde.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/tobydriscoll/ArnoldiVandermonde.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/tobydriscoll/ArnoldiVandermonde.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/tobydriscoll/ArnoldiVandermonde.jl)
+[![Build Status](https://github.com/complexvariables/ArnoldiVandermonde.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/complexvariables/ArnoldiVandermonde.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/complexvariables/ArnoldiVandermonde.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/complexvariables/ArnoldiVandermonde.jl)
 [![Aqua](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 ## Overview
@@ -57,7 +57,7 @@ maximum(abs(f(x) - p(x)) for x in range(BigFloat(0), 1, 5000))    # ≈ 3e-72
 
 ## Notes
 
-If you encounter any issues or have suggestions for improvements, please open an issue or submit a pull request on [GitHub](https://github.com/tobydriscoll/ArnoldiVandermonde.jl).
+If you encounter any issues or have suggestions for improvements, please open an issue or submit a pull request on [GitHub](https://github.com/complexvariables/ArnoldiVandermonde.jl).
 
 The same algorithms will work for any vectors that support linear combination and inner products. But this package is written with fixed-dimensional `AbstractVectors` in mind for simplicity. In fact, the resulting basis is a view of a standard `Matrix`.
 
