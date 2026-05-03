@@ -1,7 +1,8 @@
 module ArnoldiVandermonde
 
 using LinearAlgebra
-export ArnoldiBasis, ArnoldiPolynomial, nodes, degree, evaluate, vectors, increment!, project
+export ArnoldiBasis, ArnoldiPolynomial, nodes, degree, vectors,
+    evaluate, evaluate!, increment!, project
 
 const RCFloat{T} = Union{T, Complex{T}} where {T<:AbstractFloat}
 
@@ -45,7 +46,7 @@ vectors(b::ArnoldiBasis) = view(b.Q, :, 1:b.degree+1)
 
 Construct an ArnoldiBasis of degree `m` on the nodes `z`. The nodes must be distinct and the number of nodes must be at least one more than the degree.
 """
-function ArnoldiBasis(z::AbstractVector=ComplexF64[], m::Integer=0; max_degree=60)
+function ArnoldiBasis(z::AbstractVector=ComplexF64[], m::Integer=0; max_degree=max(m, 60))
     n = length(z)
     if n < m + 1
         throw(ArgumentError("Number of nodes must be at least one more than the degree"))
