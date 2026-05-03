@@ -62,6 +62,11 @@ function ArnoldiBasis(z::AbstractVector=ComplexF64[], m::Integer=0; max_degree=m
     return ArnoldiBasis{T}(z, Q, H, m)
 end
 
+"""
+    increment!(B)
+
+Increment the degree of the ArnoldiBasis `B` by one.
+"""
 function increment!(B::ArnoldiBasis{T}) where {T}
     z, Q, H = nodes(B), B.Q, B.H
     n = length(z)
@@ -198,6 +203,11 @@ function evaluate(p::ArnoldiPolynomial{T}, z::AbstractArray) where {T}
     return g
 end
 
+"""
+    evaluate!(g::AbstractArray, p::ArnoldiPolynomial, z::AbstractArray)
+
+Evaluate the ArnoldiPolynomial `p` at the points `z`, using `g` to calculate the result in-place.
+"""
 function evaluate!(g, p::ArnoldiPolynomial{T}, z::AbstractArray) where {T}
     g .= p.coeff[1]
     m = degree(p.basis)
