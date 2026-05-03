@@ -42,6 +42,8 @@ using Aqua
         for i in 1:length(z)
             @test p(z[i]) ≈ sum(coeff[j] * B.Q[i, j] for j in 1:6)
         end
+        y = p(z)
+        @test y ≈ B.Q[:, 1:6] * coeff
     end
 
     @testset "Approximation" begin

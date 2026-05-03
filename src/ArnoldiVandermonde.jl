@@ -55,15 +55,8 @@ function ArnoldiBasis(z::AbstractVector=ComplexF64[], m::Integer=0; max_degree=6
     Q = similar(v, n, max_degree + 1)
     H = similar(v, max_degree + 1, max_degree)
     Q[:, 1] .= 1
-    for m in 1:m
-        v = z .* Q[:, m]
-        for k in 1:m
-            Qk = view(Q, :, k)
-            H[k, m] = dot(Qk, v) / n
-            v .-= H[k, m] * Qk
-        end
-        H[m+1, m] = norm(v) / sqrt(n)
-        @. Q[:, m+1] = v / H[m+1, m]
+    for k in 1:m
+        _increment!(Q, H, z, k, n)
     end
     return ArnoldiBasis{T}(z, Q, H, m)
 end
@@ -78,16 +71,22 @@ function increment!(B::ArnoldiBasis{T}) where {T}
         throw(ArgumentError("Maximum degree reached; cannot grow basis"))
     end
     B.degree += 1
-    m = degree(B)
-    v = z .* Q[:, m]
+    _increment!(Q, H, z, degree(B), n)
+    return B
+end
+
+# Perform one pass of Arnoldi orthogonalization
+function _increment!(Q, H, z, m, n)
+    v = view(Q, :, m+1)
+    v .= z .* view(Q, :, m)
     for k in 1:m
         Qk = view(Q, :, k)
         H[k, m] = dot(Qk, v) / n
-        v -= H[k, m] * Qk
+        axpy!(-H[k, m], Qk, v)
     end
     H[m+1, m] = norm(v) / sqrt(n)
-    @. Q[:, m+1] = v / H[m+1, m]
-    return B
+    lmul!(1/H[m+1, m], v)
+    return nothing
 end
 
 # COV_EXCL_START
@@ -165,6 +164,7 @@ function Base.show(io::IO, p::ArnoldiPolynomial)
 end
 # COV_EXCL_STOP
 
+
 """
     p(z)
     evaluate(p, z)
@@ -172,13 +172,16 @@ end
 Evaluate the ArnoldiPolynomial `p` at `z`.
 """
 (p::ArnoldiPolynomial)(z) = evaluate(p, z)
+
 function evaluate(p::ArnoldiPolynomial{T}, z::Number) where {T}
     g = p.coeff[1]
-    H = p.basis.H
     m = degree(p.basis)
-    Q = fill(one(T), m+1)
-    for k in 1:m
-        v = z .* Q[k]
+    Q = Vector{T}(undef, m+1)
+    H = p.basis.H
+    Q[1] = one(T)
+        for k in 1:m
+        v = Q[k+1]
+        v = z * Q[k]
         for j in 1:k
             v -= H[j, k] * Q[j]
         end
@@ -186,6 +189,30 @@ function evaluate(p::ArnoldiPolynomial{T}, z::Number) where {T}
         g += p.coeff[k+1] * Q[k+1]
     end
     return g
+end
+
+function evaluate(p::ArnoldiPolynomial{T}, z::AbstractArray) where {T}
+    g = fill(p.coeff[1], length(z))
+    evaluate!(g, p, z)
+    return g
+end
+
+function evaluate!(g, p::ArnoldiPolynomial{T}, z::AbstractArray) where {T}
+    g .= p.coeff[1]
+    m = degree(p.basis)
+    Q = Matrix{T}(undef, length(z), m+1)
+    Q[:, 1] .= 1
+    H = p.basis.H
+    for k in 1:m
+        v = view(Q, :, k+1)
+        v .= z .* view(Q, :, k)
+        for j in 1:k
+            axpy!(-H[j, k], view(Q, :, j), v)
+        end
+        lmul!(1/H[k+1, k], v)
+        axpy!(p.coeff[k+1], v, g)
+    end
+    return nothing
 end
 
 """
@@ -226,16 +253,17 @@ function project(f::Function, a::Real, b::Real;
     max_degree = 100,
     error_norm = x -> norm(x, Inf)
     )
-    n = 32
     deg = 0
+    n = 32
     x = range(a, b, n+1)
     y = f.(x)
+    px = similar(y)
     B = ArnoldiBasis(x, deg; max_degree)
     p = []
     while true
         p = B \ y
-        resid = y - p.(x)
-        if error_norm(resid) < tol
+        evaluate!(px, p, x)
+        if error_norm(y - px) < tol
             break
         end
         if deg >= max_degree
@@ -249,6 +277,7 @@ function project(f::Function, a::Real, b::Real;
             x = range(a, b, n+1)
             y = f.(x)
             B = ArnoldiBasis(x, deg; max_degree)
+            px = similar(y)
         end
     end
     return p
