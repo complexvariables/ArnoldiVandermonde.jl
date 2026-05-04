@@ -52,14 +52,15 @@ The `project` function does a simple iteration on the node set and degree to fin
 f(x) = sin(exp(x))
 p = project(f, 0, 1)                         # stops at degree 17
 p = project(f, BigFloat(0), 1)               # stops at degree 77
-maximum(abs(f(x) - p(x)) for x in range(BigFloat(0), 1, 5000))    # ≈ 3e-72
+x = range(BigFloat(0), 1, 5000)
+maximum(abs, f.(x) - p(x))                   # ≈ 3e-72
 ```
 
 ## Notes
 
-If you encounter any issues or have suggestions for improvements, please open an issue or submit a pull request on [GitHub](https://github.com/complexvariables/ArnoldiVandermonde.jl).
-
-The same algorithms will work for any vectors that support linear combination and inner products. But this package is written with fixed-dimensional `AbstractVectors` in mind for simplicity. In fact, the resulting basis is a view of a standard `Matrix`.
+- Evaluation of an `ArnoldiPolynomial` directly on an array can be much faster than broadcasting scalar evaluation.
+- The same algorithms will work for any vectors that support linear combination and inner products. But this package is written with fixed-dimensional `AbstractVectors` in mind for simplicity. In fact, the resulting basis is a view of a standard `Matrix`.
+- If you encounter any issues or have suggestions for improvements, please open an issue or submit a pull request on [GitHub](https://github.com/complexvariables/ArnoldiVandermonde.jl).
 
 ## License
 
