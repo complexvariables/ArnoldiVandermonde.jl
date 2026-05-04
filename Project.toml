@@ -1,6 +1,6 @@
 name = "ArnoldiVandermonde"
 uuid = "dfb2314e-7b44-493c-847d-ffb1b242c444"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Toby Driscoll <driscoll@udel.edu> and contributors"]
 
 [deps]
