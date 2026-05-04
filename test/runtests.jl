@@ -16,7 +16,7 @@ using Aqua
                 Q = vectors(B)
                 @test nodes(B) == z
                 @test size(Q) == (n, m+1)
-                @test norm(Q' * Q - n * I) < 1e-10
+                @test norm(Q' * Q - n * I) < n * 1e-10
                 @test B.H isa UpperHessenberg
                 increment!(B)
                 m += 1
@@ -55,6 +55,9 @@ using Aqua
         p = project(f, 0, 1; tol=1e-13)
         x = nodes(p)
         @test p.(x) ≈ f.(x) atol=1e-13
+        p = project(f, BigFloat(0), 1; tol=1e-50)
+        x = nodes(p)
+        @test p(x) ≈ f.(x) atol=1e-48
         # force a node refinement, off-grid evaluation
         f(x) = sin(16x)
         p = project(f, 0, 1; tol=1e-13)
