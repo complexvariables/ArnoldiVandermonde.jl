@@ -127,7 +127,7 @@ struct ArnoldiPolynomial{T} <: Function
         if length(coeff) != degree(basis) + 1
             throw(ArgumentError("Incompatible coefficient and basis sizes"))
         end
-        tmp = similar(coeff)
+        tmp = ones(T, degree(basis) + 1)
         return new{T}(coeff, basis, tmp)
     end
     function ArnoldiPolynomial{T}(p::ArnoldiPolynomial{S}) where {T<:RCFloat,S}
