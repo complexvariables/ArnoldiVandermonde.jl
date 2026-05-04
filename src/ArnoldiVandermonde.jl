@@ -122,11 +122,13 @@ Polynomial representation using an ArnoldiBasis.
 struct ArnoldiPolynomial{T} <: Function
     coeff::Vector{T}
     basis::ArnoldiBasis{T}
+    tmp::Vector{T}   # temporary workspace for evaluation
     function ArnoldiPolynomial{T}(coeff::AbstractVector{T}, basis::ArnoldiBasis{T}) where {T<:RCFloat}
         if length(coeff) != degree(basis) + 1
             throw(ArgumentError("Incompatible coefficient and basis sizes"))
         end
-        return new{T}(coeff, basis)
+        tmp = similar(coeff)
+        return new{T}(coeff, basis, tmp)
     end
     function ArnoldiPolynomial{T}(p::ArnoldiPolynomial{S}) where {T<:RCFloat,S}
         return ArnoldiPolynomial{T}(convert.(T, p.coeff), ArnoldiBasis{T}(p.basis))
@@ -182,17 +184,17 @@ Evaluate the ArnoldiPolynomial `p` at `z`.
 function evaluate(p::ArnoldiPolynomial{T}, z::Number) where {T}
     g = p.coeff[1]
     m = degree(p.basis)
-    Q = Vector{T}(undef, m+1)
+    q = p.tmp
     H = p.basis.H
-    Q[1] = one(T)
+    q[1] = one(T)
         for k in 1:m
-        v = Q[k+1]
-        v = z * Q[k]
+        v = q[k+1]
+        v = z * q[k]
         for j in 1:k
-            v -= H[j, k] * Q[j]
+            v -= H[j, k] * q[j]
         end
-        Q[k+1] = v / H[k+1, k]
-        g += p.coeff[k+1] * Q[k+1]
+        q[k+1] = v / H[k+1, k]
+        g += p.coeff[k+1] * q[k+1]
     end
     return g
 end
