@@ -88,10 +88,10 @@ function _increment!(Q, H, z, m, n)
     for k in 1:m
         Qk = view(Q, :, k)
         H[k, m] = dot(Qk, v) / n
-        axpy!(-H[k, m], Qk, v)
+        axpy!(-H[k, m], Qk, v)    # v -= H[k, m] * Qk
     end
     H[m+1, m] = norm(v) / sqrt(n)
-    lmul!(1/H[m+1, m], v)
+    lmul!(1/H[m+1, m], v)         # v /= H[m+1, m]
     return nothing
 end
 
@@ -175,19 +175,20 @@ end
 
 """
     p(z)
-    evaluate(p, z)
+    evaluate(p, z::Union{Number, AbstractArray})
 
 Evaluate the ArnoldiPolynomial `p` at `z`.
 """
 (p::ArnoldiPolynomial)(z) = evaluate(p, z)
 
+# scalar evaluation
 function evaluate(p::ArnoldiPolynomial{T}, z::Number) where {T}
     g = p.coeff[1]
     m = degree(p.basis)
     q = p.tmp
     H = p.basis.H
-    q[1] = one(T)
-        for k in 1:m
+    #q[1] = one(T)    # already initialized to 1 in constructor
+    for k in 1:m
         v = q[k+1]
         v = z * q[k]
         for j in 1:k
@@ -199,6 +200,7 @@ function evaluate(p::ArnoldiPolynomial{T}, z::Number) where {T}
     return g
 end
 
+# array evaluation: more efficient than broadcasting scalar evaluation
 function evaluate(p::ArnoldiPolynomial{T}, z::AbstractArray) where {T}
     g = fill(p.coeff[1], length(z))
     evaluate!(g, p, z)
