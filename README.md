@@ -8,7 +8,7 @@
 
 `ArnoldiVandermonde.jl` is a Julia package for constructing and working with Arnoldi-based Vandermonde matrices. These matrices give a basis for polynomials orthogonalized over a discrete point set, which can enable robust function approximation.
 
-See [Brubeck & Trefethen, 2021](https://doi.org/10.1137/19M130100X) for an introduction to the Arnoldi–Vandermonde algorithm.
+See [Brubeck, Nakatsukasa, & Trefethen (2021)](https://doi.org/10.1137/19M130100X) for an introduction to the Arnoldi–Vandermonde algorithm.
 
 ## Installation
 
@@ -61,6 +61,11 @@ maximum(abs, f.(x) - p(x))                   # ≈ 3e-72
 - Evaluation of an `ArnoldiPolynomial` directly on an array can be much faster than broadcasting scalar evaluation.
 - The same algorithms will work for any vectors that support linear combination and inner products. But this package is written with fixed-dimensional `AbstractVectors` in mind for simplicity. In fact, the resulting basis is a view of a standard `Matrix`.
 - If you encounter any issues or have suggestions for improvements, please open an issue or submit a pull request on [GitHub](https://github.com/complexvariables/ArnoldiVandermonde.jl).
+
+## Similar work
+
+- The `ArnoldiFit` variant of `fit` provided in [`Polynomials`](https://github.com/JuliaMath/Polynomials.jl/tree/f1ee58659f4ca0000e929945524b3d613bcd8391) has similar functionality. But the present package provides easy access to the basis vectors, automatic iteration of degree and grid in `project`, and (at this writing) is faster in basis construction.
+- See also [this thread](https://discourse.julialang.org/t/julia-analog-to-rs-poly-function-orthogonal-polynomials-by-qr-decomposition/128640) about using [Krylov.jl](https://juliaregistries.github.io/General/packages/redirect_to_repo/Krylov) to accomplish this.
 
 ## License
 
